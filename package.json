@@ -1,0 +1,36 @@
+{
+  "name": "kidoker",
+  "version": "1.0.0",
+  "description": "A simpler version of the Decoder game made by the \"Behavioural and Clinical Neuroscience Institute\" at the University of Cambridge.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack-dev-server --mode development"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/diepet/kidoker.git"
+  },
+  "keywords": [
+    "decoder",
+    "cambridge",
+    "rxjs",
+    "game"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/diepet/kidoker/issues"
+  },
+  "homepage": "https://github.com/diepet/kidoker#readme",
+  "dependencies": {
+    "rxjs": "^6.4.0",
+    "ts-loader": "^5.3.3",
+    "typescript": "^3.3.3333",
+    "webpack": "^4.29.6",
+    "webpack-dev-server": "^3.2.1"
+  },
+  "devDependencies": {
+    "webpack-cli": "^3.2.3"
+  }
+}

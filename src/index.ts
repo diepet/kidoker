@@ -20,9 +20,9 @@ let settings : Settings = DEFAULT_SETTINGS
 
 // share() it is needed for avoiding a second call to generateGame() when the events of the piped 
 // observable 'numberGeneratorBufferedObservable' are generated (no double 'side effect')
-var clickObservable = fromEvent(document, 'click')
-var numberGeneratorObservable = Observable.create(function(observer : any) {
-    var game : Game = generateGame(settings);
+let clickObservable = fromEvent(document, 'click')
+let numberGeneratorObservable = Observable.create(function(observer : any) {
+    let game : Game = generateGame(settings);
     game.randomSequence.forEach(function(value) {
         let gameIteration : GameIteration = {
             item: value,
@@ -37,7 +37,7 @@ var numberGeneratorObservable = Observable.create(function(observer : any) {
     takeUntil(clickObservable),
     repeat(Number.MAX_SAFE_INTEGER));
 
-var numberGeneratorBufferedObservable = 
+let numberGeneratorBufferedObservable = 
     numberGeneratorObservable.pipe(
         bufferCount(settings.sequenceLength, 1),
         takeUntil(clickObservable),
@@ -59,25 +59,9 @@ numberGeneratorBufferedObservable.subscribe(
             lastItems.push(gameIteration.item)
         })
 
-        /* TODO the final check */
-        console.log(lastItems[lastItems.length - 1] == gameIterations[gameIterations.length - 1].item)
+        console.log(equalsArray(lastItems, gameIterations[gameIterations.length - 1].winningSequence))
     }
 );
-
-/*
-
-
-clickObservable.subscribe(
-    val => console.log(`CLICKED: ${val}`)
-);
-
-numberGeneratorObservable.subscribe(
-    (x:any) => logItem(x),
-    (error: any) => logItem ('Error: ' + error),
-    () => logItem('Completed')
-);
-*/
-
 
 function paintGameIteration(gameIteration : GameIteration) {
     document.getElementById("itemScrollerPanel").innerHTML = gameIteration.item;
@@ -86,7 +70,7 @@ function paintGameIteration(gameIteration : GameIteration) {
 
 function generateWinningSequence(settings : Settings) : string[] {
     let arrayToShuffle : string[] = Array.from(settings.alphabet)
-    var j, x;
+    let j, x;
     for (let i = arrayToShuffle.length - 1; i > 0; i--) {
         j = Math.floor(Math.random() * (i + 1));
         x = arrayToShuffle[i];
@@ -96,11 +80,9 @@ function generateWinningSequence(settings : Settings) : string[] {
     return arrayToShuffle.slice(0, settings.sequenceLength);
 }
 
-
 function generateRandomInt(min : number, max : number) : number {
     return Math.floor(Math.random() * (max - min)) + min;
 }
-
 
 function generateGame(settings : Settings) : Game {
     // generate winning sequence
@@ -115,3 +97,19 @@ function generateGame(settings : Settings) : Game {
     return { randomSequence: randomSequence, winningSequence: winningSequence }
 }
 
+function equalsArray(array1 : string[], array2 : string[]) {
+
+    let len1 = array1.length
+    let len2 = array2.length
+
+    if (len1 != len2) { return false }
+
+    for (let i=0; i<len1; i++) {
+        if (array1[i] !== array2[i]) {
+            return false;
+        }
+    }
+
+    return true;
+
+}

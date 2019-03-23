@@ -1,6 +1,6 @@
 {
   "name": "kidoker",
-  "version": "1.0.0",
+  "version": "0.9.0",
   "description": "A simpler version of the Decoder game made by the \"Behavioural and Clinical Neuroscience Institute\" at the University of Cambridge.",
   "main": "index.js",
   "scripts": {

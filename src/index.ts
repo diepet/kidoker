@@ -1,21 +1,7 @@
-import { Observable, Observer } from 'rxjs';
+import { Observable, Observer, of } from 'rxjs';
 import { timer, fromEvent, from } from 'rxjs';
-import { map, bufferCount, share, takeUntil, repeat } from 'rxjs/operators'
-
-
-interface Settings {
-    startScrollMs : number;
-    scrollFrequencyMs : number;
-    sequenceLength : number;
-    minItemsForGame : number;
-    maxItemsForGame : number;
-    alphabet : string[];
-}
-
-interface Game {
-    randomSequence : string[];
-    winningSequence : string[]
-}
+import { map, concatMap, bufferCount, share, takeUntil, repeat, delay, concatAll } from 'rxjs/operators'
+import { Settings, Game, GameIteration } from './model'
 
 const DEFAULT_KIDOKER_ALPHABET : string[] = [ "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
@@ -23,8 +9,8 @@ const DEFAULT_SETTINGS : Settings = {
     startScrollMs: 3000,
     scrollFrequencyMs: 1000,
     sequenceLength: 3,
-    minItemsForGame: 2,
-    maxItemsForGame: 10,
+    minItemsForGame: 4,
+    maxItemsForGame: 15,
     alphabet: DEFAULT_KIDOKER_ALPHABET
 }
 
@@ -36,10 +22,16 @@ var clickObservable = fromEvent(document, 'click')
 var numberGeneratorObservable = Observable.create(function(observer  : any) {
     var game : Game = generateGame(settings);
     game.randomSequence.forEach(function(value) {
-        observer.next(value);
+        let gameIteration : GameIteration = {
+            item: value,
+            winningSequence: game.winningSequence
+        }
+        observer.next(gameIteration);
     });
     observer.complete();
-});
+}).pipe(
+    concatMap((gameIteration : GameIteration) => of(gameIteration).pipe(delay(settings.scrollFrequencyMs))),
+    repeat(Number.MAX_SAFE_INTEGER));
 
 /*
 var numberGeneratorObservable = 
@@ -52,19 +44,10 @@ var numberGeneratorObservable =
 var numberGeneratorBufferedObservable = numberGeneratorObservable.pipe(bufferCount(3, 1))
 */
 
-//numberGeneratorObservable = from(DEFAULT_KIDOKER_ALPHABET)
-
-//numberGeneratorObservable = numberGeneratorObservable.pipe(takeUntil(clickObservable))
 
 numberGeneratorObservable.subscribe(
-    (x:any) => logItem(x)
+    (gameIteration : GameIteration) => paintGameIteration(gameIteration)
 );
-
-7/*
-numberGeneratorBufferedObservable.subscribe(
-    (x:any) => console.log(x)
-);
-*/
 
 clickObservable.subscribe(
     val => console.log(`CLICKED: ${val}`)
@@ -80,10 +63,9 @@ numberGeneratorObservable.subscribe(
 */
 
 
-function logItem(val:any) {
-    //document.getElementById("numberScrollerPanel").innerHTML = val;
-    var html = document.getElementById("numberScrollerPanel").innerHTML;
-    document.getElementById("numberScrollerPanel").innerHTML = html + '<br>' + val;
+function paintGameIteration(gameIteration : GameIteration) {
+    document.getElementById("itemScrollerPanel").innerHTML = gameIteration.item;
+    document.getElementById("winningSequencePanel").innerHTML = gameIteration.winningSequence.join(" ")
 }
 
 function generateWinningSequence(settings : Settings) : string[] {

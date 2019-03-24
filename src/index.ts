@@ -1,6 +1,5 @@
-import { Observable, Observer, of } from 'rxjs';
-import { timer, fromEvent, from } from 'rxjs';
-import { map, concatMap, bufferCount, share, takeUntil, repeat, delay, concatAll, last, catchError } from 'rxjs/operators'
+import { Observable, of, fromEvent, merge } from 'rxjs';
+import { concatMap, bufferCount, share, takeUntil, repeat, delay, last, catchError } from 'rxjs/operators'
 import { Settings, Game, GameIteration } from './model'
 
 const DEFAULT_KIDOKER_ALPHABET : string[] = [ "1", "2", "3", "4", "5", "6", "7", "8", "9"]
@@ -21,6 +20,8 @@ let settings : Settings = DEFAULT_SETTINGS
 // share() it is needed for avoiding a second call to generateGame() when the events of the piped 
 // observable 'numberGeneratorBufferedObservable' are generated (no double 'side effect')
 let clickObservable = fromEvent(document, 'click')
+let keyupObservable = fromEvent(document, 'keyup')
+let userActionObservable = merge(clickObservable, keyupObservable)
 let numberGeneratorObservable = Observable.create(function(observer : any) {
     let game : Game = generateGame(settings);
     game.randomSequence.forEach(function(value) {
@@ -34,13 +35,13 @@ let numberGeneratorObservable = Observable.create(function(observer : any) {
 }).pipe(
     concatMap((gameIteration : GameIteration) => of(gameIteration).pipe(delay(settings.scrollFrequencyMs))),
     share(),
-    takeUntil(clickObservable),
+    takeUntil(userActionObservable),
     repeat(Number.MAX_SAFE_INTEGER));
 
 let numberGeneratorBufferedObservable = 
     numberGeneratorObservable.pipe(
         bufferCount(settings.sequenceLength, 1),
-        takeUntil(clickObservable),
+        takeUntil(userActionObservable),
         last(),
         // for avoiding EmptyError when a click event is generated without a buffer
         catchError(_ => of([EMPTY_GAME_ITERATION ] )), 

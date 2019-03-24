@@ -22,7 +22,7 @@ module.exports = {
     },
     plugins: [
       new CopyPlugin([
-        { from: 'index.html', to: 'index.html' },
+        { from: 'src/index.html', to: 'index.html' },
       ]),
     ],
 };
